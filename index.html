@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muscle Bound Interface (Simplified)</title>
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        /* Styles */
+        body { font-family: 'Lato', sans-serif; background-color: #F0FFF0; color: #333; } h1, h2, h3, h4, h5, h6, .font-montserrat { font-family: 'Montserrat', sans-serif; } ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; } ::-webkit-scrollbar-thumb { background: #aaa; border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: #888; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 60; transition: opacity 0.3s ease; } .modal-content { background-color: white; padding: 1.5rem 2rem; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; z-index: 61; border: 1px solid #28a745; min-width: 300px; max-width: 90%; animation: fadeInScale 0.3s ease-out; }
+        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @media (max-width: 768px) { .sidebar { transform: translateX(-100%); transition: transform 0.3s ease-in-out; position: fixed; z-index: 40; height: 100%; } .sidebar.open { transform: translateX(0); } }
+        .icon { display: inline-block; vertical-align: middle; font-style: normal; font-weight: bold; margin-right: 0.5rem; } /* Style for text icons */
+        .animate-spin { animation: spin 1s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } .fade-in { animation: fadeIn 0.3s ease-in-out; } @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .content-box { background-color: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 1.5rem; border: 1px solid #28a745; margin: 1rem 1.5rem; }
+        input:focus, select:focus, textarea:focus { outline: none; box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.5); border-color: #28a745 !important; }
+    </style>
+</head>
+<body>
+    <div id="root"> <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Lato, sans-serif; color: #218838;"> Loading Muscle Bound Interface (Simplified)... </div> </div>
+
+    <script type="text/babel">
+        try {
+            // Initial Library Checks
+            if (typeof React === 'undefined') throw new Error('React CDN failed');
+            if (typeof ReactDOM === 'undefined') throw new Error('ReactDOM CDN failed');
+            if (typeof Babel === 'undefined') throw new Error('Babel CDN failed');
+            console.log("Simplified Test: Core libraries loaded.");
+
+            const { useState, useEffect, useCallback, StrictMode } = React;
+
+            // --- Sidebar Component ---
+             function Sidebar({ activeView, setActiveView, isMobileOpen, toggleMobileSidebar }) {
+                 const menuItems = [
+                     { id: 'dashboard', label: 'Dashboard' },
+                     { id: 'findMedicine', label: 'Find Medicine' },
+                     { id: 'orderMedicine', label: 'Order Medicine' },
+                     { id: 'myOrders', label: 'My Orders' },
+                     { id: 'support', label: 'Support' },
+                 ];
+                 const baseClasses = "flex items-center w-full px-4 py-3 text-sm text-white rounded-lg transition-colors duration-200";
+                 const activeClasses = "bg-[#28a745]";
+                 const hoverClasses = "hover:bg-[#5cb860]";
+                 const handleItemClick = (viewId) => {
+                     setActiveView(viewId);
+                     if (window.innerWidth < 768) {
+                         toggleMobileSidebar();
+                     }
+                 };
+                 return (
+                     <div className={`sidebar ${isMobileOpen ? 'open' : ''} fixed inset-y-0 left-0 z-30 w-64 bg-[#218838] text-white flex flex-col md:translate-x-0 shadow-lg md:shadow-none`}>
+                         <div className="p-4 text-2xl font-bold font-montserrat border-b border-white/20 flex items-center"> <span className="icon">💪</span> Muscle Bound </div>
+                         <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto"> {menuItems.map(item => ( <button key={item.id} onClick={() => handleItemClick(item.id)} className={`${baseClasses} ${activeView === item.id ? activeClasses : hoverClasses}`}> {item.label} </button>))} </nav>
+                         <div className="p-4 border-t border-white/20"> <button onClick={() => handleItemClick('support')} className={`${baseClasses} ${activeView === 'support' ? activeClasses : hoverClasses}`}> Support </button> </div>
+                     </div>
+                 );
+             }
+
+            // --- Header Component ---
+             function Header({ activeView, setActiveView, toggleMobileSidebar }) {
+                const navItems = [
+                    { id: 'medications', label: 'Medications' },
+                    { id: 'pharmacies', label: 'Pharmacies' },
+                    { id: 'appointments', label: 'Appointments' }
+                ];
+                const [isRefreshing, setIsRefreshing] = useState(false);
+                const handleRefresh = () => { setIsRefreshing(true); setTimeout(() => { alert('Content Refreshed (Mock)'); setIsRefreshing(false); }, 500); };
+                const dropdownButtonClasses = "p-1.5 text-gray-600 rounded-full hover:bg-[#d4edda] hover:text-gray-800 focus:outline-none transition-colors duration-200";
+                const activeNavClass = "bg-[#d4edda] text-[#28a745]";
+                const inactiveNavClass = "text-gray-700 hover:bg-[#d4edda]";
+                const handleNavClick = (viewId) => {
+                    setActiveView(viewId);
+                    alert(`Navigating to: ${viewId}`); // Basic interaction
+                };
+                const handleSettingsClick = () => alert('Opening Settings');
+                const handleLanguageClick = () => alert('Changing Language');
+                const handleProfileClick = () => alert('Viewing Profile');
+
+                return (
+                     <header className="fixed top-0 left-0 right-0 z-20 bg-[#F0FFF0] shadow-sm md:ml-64">
+                         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
+                             <button onClick={toggleMobileSidebar} className="text-gray-600 md:hidden mr-4"> ☰ </button> {/* Menu Icon */}
+                             <nav className="hidden md:flex items-center space-x-2"> {navItems.map(item => ( <button key={item.id} onClick={() => handleNavClick(item.id)} className={`px-3 py-1.5 text-sm rounded-md transition-colors duration-200 ${activeView === item.id ? activeNavClass : inactiveNavClass}`}> {item.label} </button> ))} </nav>
+                             <div className="text-lg font-semibold md:hidden font-montserrat flex-1 text-center text-[#28a745]"> Muscle Bound </div>
+                             <div className="flex items-center space-x-1 sm:space-x-2">
+                                 <button onClick={handleSettingsClick} className={dropdownButtonClasses} title="Settings"> <span className="icon">⚙️</span> </button>
+                                 <button onClick={handleRefresh} disabled={isRefreshing} className={dropdownButtonClasses} title="Refresh"> {isRefreshing ? <span className="icon animate-spin">🔄</span> : <span className="icon">🔄</span>} </button>
+                                 <button onClick={handleLanguageClick} className={dropdownButtonClasses} title="Language"> <span className="icon">🌐</span> </button>
+                                 <button onClick={handleProfileClick} className={dropdownButtonClasses} title="Profile"> <span className="icon">👤</span> </button>
+                             </div>
+                         </div>
+                     </header>
+                 );
+             }
+
+            // --- Main Content Component (Highly Simplified) ---
+             function MainContent({ activeView }) {
+                 let contentTitle = "Overview";
+                 let contentBody = <p>Welcome to Muscle Bound!</p>;
+
+                 switch (activeView) {
+                     case 'dashboard':
+                         contentTitle = "Dashboard";
+                         contentBody = (
+                             <div>
+                                 <p>Your medical overview at a glance.</p>
+                                 <div className="relative max-w-xl mx-auto my-4">
+                                    <input type="text" placeholder="Search for medications..." className="w-full pl-4 pr-12 py-2 text-base border border-[#28a745] rounded-full shadow-sm focus:ring-2 focus:ring-[#28a745] focus:border-[#28a745] bg-white"/>
+                                    <button onClick={() => alert('Searching for medication!')} className={`absolute inset-y-0 right-0 flex items-center px-4 m-1 rounded-full text-white bg-[#28a745] hover:bg-green-700`}> Search </button>
+                                 </div>
+                                 <div className="flex justify-center gap-2 mt-4">
+                                    <button className="px-3 py-1 text-sm border rounded bg-white hover:bg-gray-100">Prescriptions</button>
+                                    <button className="px-3 py-1 text-sm border rounded bg-white hover:bg-gray-100">Refills</button>
+                                 </div>
+                             </div>
+                         );
+                         break;
+                     case 'findMedicine':
+                         contentTitle = "Find Medicine";
+                         contentBody = <p>Browse and search for available medications.</p>;
+                         break;
+                     case 'orderMedicine':
+                         contentTitle = "Order Medicine";
+                         contentBody = <p>Place an order for your required medicines.</p>;
+                         break;
+                     case 'myOrders':
+                         contentTitle = "My Orders";
+                         contentBody = <p>View your past and current medicine orders.</p>;
+                         break;
+                      case 'support':
+                         contentTitle = "Support";
+                         contentBody = <p>Get help and support regarding our services.</p>;
+                         break;
+                      case 'medications':
+                         contentTitle = "Medications";
+                         contentBody = <p>Explore detailed information about medications.</p>;
+                         break;
+                      case 'pharmacies':
+                         contentTitle = "Pharmacies";
+                         contentBody = <p>Find nearby pharmacies.</p>;
+                         break;
+                      case 'appointments':
+                         contentTitle = "Appointments";
+                         contentBody = <p>Manage your medical appointments.</p>;
+                         break;
+                     default:
+                         contentTitle = "Overview";
+                         contentBody = <p>Welcome to Muscle Bound!</p>;
+                 }
+
+                 return (
+                     <main className="flex-1 overflow-y-auto pt-20 md:pt-16 pb-6"> {/* Adjusted padding top */}
+                         <div className="content-box">
+                             <h2 className="font-montserrat text-xl font-bold text-[#28a745] mb-4">{contentTitle}</h2>
+                             {contentBody}
+                         </div>
+                     </main>
+                 );
+             }
+
+            // --- App Component ---
+            function App() { const [activeView, setActiveView] = useState('dashboard'); const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false); const toggleMobileSidebar = useCallback(() => { setIsMobileSidebarOpen(prev => !prev); }, []); useEffect(() => { setIsMobileSidebarOpen(false); }, [activeView]); return ( <div className="flex h-screen bg-[#F0FFF0] overflow-hidden"> {isMobileSidebarOpen && <div className="fixed inset-0 z-30 bg-black opacity-50 md:hidden" onClick={toggleMobileSidebar}></div>} <Sidebar activeView={activeView} setActiveView={setActiveView} isMobileOpen={isMobileSidebarOpen} toggleMobileSidebar={toggleMobileSidebar}/> <div className="flex flex-col flex-1 md:ml-64"> <Header activeView={activeView} setActiveView={setActiveView} toggleMobileSidebar={toggleMobileSidebar}/> <MainContent activeView={activeView} /> </div> {/* Toast component removed for simplicity */} </div> ); }
+
+            // --- Render the App ---
+            const rootElement = document.getElementById('root');
+            if (rootElement) { const root = ReactDOM.createRoot(rootElement); root.render(<StrictMode><App /></StrictMode>); console.log("Simplified React App rendering executed."); } else { console.error("Root element #root not found."); }
+
+        } catch (error) {
+            console.error("Simplified Test Critical Error:", error);
+            const rootDiv = document.getElementById('root');
+            if (rootDiv) { rootDiv.innerHTML = `<div style="padding: 20px; font-family: sans-serif; color: red;"><h2>Application Error</h2><p>Could not load simplified interface. Check console (F12).</p><pre style="background-color: #fdd; border: 1px solid red; padding: 10px; white-space: pre-wrap; word-wrap: break-word;">${error.message}\n\n${error.stack}</pre></div>`; }
+        }
+    </script>
+
+</body>
+</html>
